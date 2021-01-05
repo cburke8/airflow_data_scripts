@@ -23,7 +23,7 @@ def run_query(connection, query):
     cursor.execute(query)
     cursor.close()
     
-def main():
+def query_production():
     snowflakecursor = snow_conn.cursor()
     try:
         sql = 'use warehouse {}'.format(warehouse)
@@ -43,12 +43,66 @@ def main():
         run_query(snow_conn, sql)
         sql = 'use schema {}'.format(schema)
         run_query(snow_conn, sql)
-        sql = 'COPY into CITI_BIKE_PARQUET_TEST_ONE from @citi_bike_s3_stage on_error = skip_file file_format = (type = parquet);'
+        sql = 'COPY into CITI_BIKE_PARQUET_PROD from @citi_bike_s3_stage_prod on_error = skip_file file_format = (type = parquet);'
         run_query(snow_conn, sql)
-        sql = 'SELECT * from CITI_BIKE_PARQUET_TEST_ONE limit 10;'
+        sql = 'SELECT * from CITI_BIKE_PARQUET_PROD limit 10;'
+        run_query(snow_conn, sql)
+        
+    except Exception as e:
+        print(e)
+        
+def query_uat():
+    snowflakecursor = snow_conn.cursor()
+    try:
+        sql = 'use warehouse {}'.format(warehouse)
+        run_query(snow_conn, sql) 
+    except:
+        pass
+    try:
+        sql = 'alter warehouse {} resume'.format(warehouse)
+        run_query(snow_conn, sql)
+    except:
+        pass
+    
+    try:
+        sql = 'use database {}'.format(database)
+        run_query(snow_conn, sql)
+        sql = 'use role {}'.format(role)
+        run_query(snow_conn, sql)
+        sql = 'use schema {}'.format(schema)
+        run_query(snow_conn, sql)
+        sql = 'COPY into CITI_BIKE_PARQUET_UAT from @citi_bike_s3_stage_uat on_error = skip_file file_format = (type = parquet);'
+        run_query(snow_conn, sql)
+        sql = 'SELECT * from CITI_BIKE_PARQUET_UAT limit 10;'
         run_query(snow_conn, sql)
         
     except Exception as e:
         print(e)
 
-main()
+def query_sit():
+    snowflakecursor = snow_conn.cursor()
+    try:
+        sql = 'use warehouse {}'.format(warehouse)
+        run_query(snow_conn, sql) 
+    except:
+        pass
+    try:
+        sql = 'alter warehouse {} resume'.format(warehouse)
+        run_query(snow_conn, sql)
+    except:
+        pass
+    
+    try:
+        sql = 'use database {}'.format(database)
+        run_query(snow_conn, sql)
+        sql = 'use role {}'.format(role)
+        run_query(snow_conn, sql)
+        sql = 'use schema {}'.format(schema)
+        run_query(snow_conn, sql)
+        sql = 'COPY into CITI_BIKE_PARQUET_SIT from @citi_bike_s3_stage_sit on_error = skip_file file_format = (type = parquet);'
+        run_query(snow_conn, sql)
+        sql = 'SELECT * from CITI_BIKE_PARQUET_SIT limit 10;'
+        run_query(snow_conn, sql)
+        
+    except Exception as e:
+        print(e)
